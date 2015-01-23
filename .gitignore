@@ -6,6 +6,7 @@
 *.txt
 *.bin
 *.old
+*.sh
 nagato_classify
 nagato_train
 *.xml

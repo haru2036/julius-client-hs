@@ -11,7 +11,7 @@ nagato_classify
 nagato_train
 *.xml
 *.iml
-*.xlsx
+*.idea
 *.csv
 dist
 .cabal-sandbox

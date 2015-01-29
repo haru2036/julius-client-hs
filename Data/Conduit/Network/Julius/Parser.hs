@@ -1,24 +1,28 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Data.Conduit.Network.Julius.Parser where
-import Data.Conduit.Network.Julius.Types
 import Text.XML.Cursor
-import qualified Data.Text as T (Text)
+import Text.XML as X
+import Data.Text(Text)
 
-parse :: Element -> Either String JuliusMessage
-parse xElem = case (qName $ elName xElem) of
-                "STARTPROC" -> Right StartProc
-                "ENDPROC" -> Right EndProc
-                "STARTRECOG" -> Right StartRecog
-                "ENDRECOG" -> Right EndRecog
-                "RecogOut" -> Right $ RecogOut $ parseRecogOut xElem
-                _ -> Left "UnExpected Element"
+test :: IO Cursor
+test = do
+  file <- X.readFile (def :: ParseSettings) "demo.xml"
+  return $ fromDocument file
+{-
 
-parseRecogOut :: Element -> recogOut
-parseRecogOut xElem = map parseShypo $ elContent xElem
+whypos :: Cursor -> [Whypo]
+whypos = map cWhypo findWhypos
 
-parseShypo xElem = Shypo rnk scr grm wps
-            where attribs = elAttribs xElem
-                  rnk = find attribs
+cWhypo :: Cursor -> Whypo
+cWhypo = node
 
+cursorElement :: Cursor -> Element
+cursorElement =
 
+findWhypos :: Cursor -> [Cursor]
+findWhypos c = c $// element "WHYPO"
+-}
+
+recogText :: Cursor -> [Text]
+recogText c = c $// attribute (Name "WORD" Nothing Nothing)

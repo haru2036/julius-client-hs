@@ -1,5 +1,4 @@
-module Data.Conduit.Network.Julius.Types (
-) where
+module Data.Conduit.Network.Julius.Types  where
 
 import Data.Text(Text) 
 

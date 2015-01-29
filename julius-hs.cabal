@@ -16,7 +16,8 @@ build-type:          Simple
 cabal-version:       >=1.10
 
 library
-  -- exposed-modules:     
+  exposed-modules:     Data.Conduit.Network.Julius.Parser
+                      ,Data.Conduit.Network.Julius.Type
   -- other-modules:       
   -- other-extensions:    
   build-depends:       base >=4.6 && <4.8

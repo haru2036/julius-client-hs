@@ -4,22 +4,25 @@ import Data.Conduit.Network
 import Data.Conduit
 import Data.Conduit.List as CL
 import Data.ByteString
-import Data.ByteString.Lazy (fromStrict)
 import Data.Text(Text)
 import Data.Maybe
 
 main :: IO()
-main = do
-  runTCPClient (clientSettings 10500 "localhost") runner
+main = runTCPClient (clientSettings 10500 "127.0.0.1") runner
 
 runner :: AppData -> IO()
-runner appData = (appSource appData) $$ parseConduit =$ (CL.mapM_ print)
+runner appData = (appSource appData) $$ decodeConduit =$= parseConduit =$ (CL.mapM_ print)
 
-parseConduit :: Monad m => Conduit ByteString m [Text] 
+parseConduit :: Monad m => Conduit Text m [Text] 
 parseConduit = do
   a <- await
-  let eitherParsed = parseTextFromByteString $ fromStrict $ fromJust a
-  let texts = case eitherParsed of
-        Right parsed -> recogTextFromDocument parsed
-        _ -> error "Parse Error"
-  yield $ texts
+  let messages = splitMessages $ fromJust a
+  yield $ Prelude.concat $ Prelude.map (listWords . parseTextDefault . fromStrictText) messages
+
+listWords (Right parsed) =  recogTextFromDocument parsed
+listWords (Left err) = error $ "Parse Error : " ++ show err 
+
+decodeConduit :: Monad m => Conduit ByteString m Text
+decodeConduit = do
+  a <- await
+  yield $ decodeUtf8 $ fromJust a

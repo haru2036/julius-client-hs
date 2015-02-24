@@ -37,7 +37,7 @@ parseTextDefault :: LT.Text -> Either SomeException Document
 parseTextDefault = parseText (def :: ParseSettings)
 
 splitMessages :: Text -> [Text]
-splitMessages = splitOn "."
+splitMessages = splitOn ".\n"
 
 fromStrictText :: Text -> LT.Text
 fromStrictText = toLazyText . fromText

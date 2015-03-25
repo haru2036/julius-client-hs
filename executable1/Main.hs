@@ -12,17 +12,25 @@ main :: IO()
 main = runGeneralTCPClient (clientSettings 10500 "127.0.0.1") runner
 
 runner :: AppData -> IO()
-runner appData = (appSource appData) $$ decodeConduit =$= parseConduit =$ (CL.mapM_ print)
+runner appData = (appSource appData) $$ decodeConduit =$= (parseConduit Nothing) =$ (CL.mapM_ print)
 
-parseConduit :: Monad m => Conduit T.Text m [T.Text] 
-parseConduit = do
+parseConduit :: Monad m => Maybe T.Text -> Conduit T.Text m [T.Text] 
+parseConduit previousText = do
   ma <- await
   case ma of
     Just a -> do 
-      let messages = trace (T.unpack a) (splitMessages a)
-      --let messages = splitMessages a
-      yield (Prelude.concat $ Prelude.map (listWords . parseTextDefault . fromStrictText) messages) >> parseConduit  
+      let b = (maybeEmpty previousText) `T.append` a
+      if T.isInfixOf "\n." b 
+      then do 
+        let messages = (splitMessages b)
+        traceShowM messages
+        yield (Prelude.concat $ Prelude.map (listWords . parseTextDefault . fromStrictText) messages) 
+        parseConduit Nothing 
+      else parseConduit $ Just b
     Nothing -> return ()
+  where
+    maybeEmpty :: Maybe T.Text -> T.Text
+    maybeEmpty = maybe "" id
 
 listWords (Right parsed) = recogTextFromDocument parsed
 listWords (Left _) = []
